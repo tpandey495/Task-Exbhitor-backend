@@ -17,11 +17,13 @@ exports.login = async (req, res) => {
 }
 exports.signUp = async (req, res) => {
     try {
-        let { email, fName, lName, password } = req.body;
+        let { email, fName, lName, password,type } = req.body;
         if (!email) return Utils.sendErrorResponse(req, res, 400, 'send emailId');
         req.body.email = email.toLowerCase();
         req.body.fName = fName.toLowerCase();
         req.body.lName = lName.toLowerCase();
+        if (type)
+            req.body.type = type.toLowerCase();
         let isUser = await UserSchema.findOne({ email : req.body.email });
         if (isUser)
             return Utils.sendErrorResponse(req, res, 400, 'user has already account with this email');
