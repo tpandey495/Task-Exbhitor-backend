@@ -12,9 +12,21 @@ exports.addTask = async (req, res) => {
             throw { message: 'this task already present' };
         let newTask = new TaskSchema(req.body);
         await newTask.save();
-        return Utils.sendSuccessResponse(req, res, 200, { message: "successfully created", sucess: true, data: newTask });
+        return Utils.sendSuccessResponse(req, res, 200, { message: "successfully created", success: true, data: newTask });
     }
     catch (e) {
-        return Utils.sendErrorResponse(req, res, 400, {message : e.message, sucess : false});
+        return Utils.sendErrorResponse(req, res, 400, {message : e.message, success : false});
+    }
+}
+
+exports.getTask = async (req, res) => {
+    try {
+        let { plan_id } = req.params;
+        const tasks = await TaskSchema.find({ plan_id });
+        return Utils.sendSuccessResponse(req, res, 200, { data: tasks, success: true });
+
+    }
+    catch (e) {
+        return Utils.sendErrorResponse(req, res, 400, { message : e.message , success : false})
     }
 }
