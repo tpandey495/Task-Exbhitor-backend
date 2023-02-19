@@ -5,5 +5,6 @@ const taskController = require('../controller/task.contoller');
 routers.post('/', verifyToken, taskController.addTask);
 routers.get('/', verifyToken, taskController.getTask); 
 routers.get("/daily", verifyToken, taskController.getDailyTask);
+routers.get('/today', verifyToken, taskController.getTodayTask);
 
 module.exports = routers;
