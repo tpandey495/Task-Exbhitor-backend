@@ -7,7 +7,8 @@ exports.addTask = async (req, res) => {
         if (!req.body.task_name || !req.body.plan_id || !req.body.date)
             throw { message: 'please send required data' };
         req.body.task_name = req.body.task_name.toLowerCase();
-        
+        const date = {day : parseInt(req.body.date.split("-")[2]), month : parseInt(req.body.date.split("-")[1]), year : parseInt(req.body.date.split("-")[0]),}
+        req.body.date = date;
         let isTask = await TaskSchema.findOne({ plan_id: req.body.plan_id, task_name: req.body.task_name });
         if (isTask)
             throw { message: 'this task already present' };
