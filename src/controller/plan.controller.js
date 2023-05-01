@@ -33,3 +33,17 @@ exports.getPlans = async (req, res) => {
         return Utils.sendErrorResponse(req, res, 400, e.message);
     }
 }
+
+/** edit plan schema */
+exports.editPlan = async (req, res) => { 
+    try {
+        const { plan_id } = req.body;
+        if (!plan_id)
+            throw { message: "Please send plan id" };
+        const isUpdated = await PlanSchema.updateOne({ _id: plan_id }, {$set : req.body});
+        return Utils.sendSuccessResponse(req, res, 200, { message: "sucessfully! Plan has updated", data: isUpdated });
+    }
+    catch (e) {
+        return Utils.sendErrorResponse(req, res, 400, e.message);
+    }
+}

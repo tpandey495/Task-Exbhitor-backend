@@ -100,3 +100,25 @@ exports.getTodayTask = async (req, res) => {
         return Utils.sendErrorResponse(req, res, 400, { message: e.message, success: false });
     }
 }
+
+/** update task  */
+exports.updateTask = async (req, res) => {
+    try {
+        if (!req.body.task_id)
+            throw { message: 'please send required data' };
+        if (req.body.task_name)
+            req.body.task_name = req.body.task_name.toLowerCase();
+        if (req.body.date)
+            req.body.date = {day : parseInt(req.body.date.split("-")[2]), month : parseInt(req.body.date.split("-")[1]), year : parseInt(req.body.date.split("-")[0]),}
+        let isTask = await TaskSchema.findOne({ _id : req.body.task_id });
+        if (!isTask)
+            throw { message: 'this task_id is not present' };
+        const isUpdated = await TaskSchema.updateOne({ _id: req.body.task_id }, {$set : req.body});
+        // await newTask.save();
+        return Utils.sendSuccessResponse(req, res, 200, { message: "successfully created", success: true, data: isUpdated });
+
+    }
+    catch (e) {
+        return Utils.sendErrorResponse(req, res, 400, { message: e.message, success: false });
+    }
+ }

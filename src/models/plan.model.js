@@ -4,7 +4,8 @@ const PlanSchema = new mongoose.Schema(
     {
         user_id: { type: mongoose.Types.ObjectId, required: true , ref : 'User'},
         plan_name: { type: String, required: true, trim: true },
-        desc: {type : String}
+        desc: { type: String },
+        deleted_flag : { type: Boolean, default: false }
     },
     {
         timestamps : true

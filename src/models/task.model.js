@@ -9,7 +9,8 @@ const TaskSchema = new mongoose.Schema(
         },
         is_daily_task: { type: Boolean, default: false },
         timing: { type: String },
-        is_completed : { type : Boolean, default : false}
+        is_completed: { type: Boolean, default: false, required : true },
+        deleted_flag : { type: Boolean, default: false, required : true }
     },
     {
         timestamps: true,

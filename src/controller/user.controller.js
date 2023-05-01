@@ -9,10 +9,11 @@ exports.login = async (req, res) => {
         if (!isUser)
             return sendErrorResponse(req, res, 400, 'user is not exists');
         let token = await isUser.generateAuthToken();
+        console.log(token)
         return Utils.sendSuccessResponse(req, res, 200, {user : isUser, authToken : token});
     }
     catch (e) {
-        return Utils.sendErrorResponse(req, res, 500, e.message);   
+        return Utils.sendErrorResponse(req, res, 400, e.message);   
     }
 }
 exports.signUp = async (req, res) => {

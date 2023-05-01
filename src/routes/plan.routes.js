@@ -4,4 +4,5 @@ const planController = require("../controller/plan.controller");
 
 routers.post('/', verifyToken, planController.createPlan);
 routers.get('/', verifyToken, planController.getPlans);
+routers.put('/', verifyToken, planController.editPlan);
 module.exports = routers;
