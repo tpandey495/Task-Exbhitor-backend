@@ -110,7 +110,9 @@ exports.updateTask = async (req, res) => {
             req.body.task_name = req.body.task_name.toLowerCase();
         if (req.body.date)
             req.body.date = {day : parseInt(req.body.date.split("-")[2]), month : parseInt(req.body.date.split("-")[1]), year : parseInt(req.body.date.split("-")[0]),}
-        let isTask = await TaskSchema.findOne({ _id : req.body.task_id });
+        if (req.body.is_completed)
+            req.body.complated_date = new Date();
+        let isTask = await TaskSchema.findOne({ _id: req.body.task_id });
         if (!isTask)
             throw { message: 'this task_id is not present' };
         const isUpdated = await TaskSchema.updateOne({ _id: req.body.task_id }, {$set : req.body});
