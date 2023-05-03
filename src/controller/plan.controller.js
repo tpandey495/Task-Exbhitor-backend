@@ -26,7 +26,7 @@ exports.createPlan = async (req, res) => {
 exports.getPlans = async (req, res) => {
     try {
         let user_id = req.user._id;
-        const plans = await PlanSchema.find({ user_id }, { plan_name: 1, desc: 1 });
+        const plans = await PlanSchema.find({ user_id, deleted_flag : false }, { plan_name: 1, desc: 1 });
         return Utils.sendSuccessResponse(req, res, 200, plans);
     }
     catch (e) {

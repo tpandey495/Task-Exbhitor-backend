@@ -25,7 +25,7 @@ exports.addTask = async (req, res) => {
 exports.getTask = async (req, res) => {
     try {
         let { plan_id } = req.query;
-        let query = plan_id ? { plan_id } : {};
+        let query = plan_id ? { plan_id , deleted_flag : false} : {deleted_flag : false};
         const tasks = await TaskSchema.find(query);
         return Utils.sendSuccessResponse(req, res, 200, { data: tasks, success: true });
 
@@ -47,13 +47,13 @@ exports.getDailyTask = async (req, res) => {
         let task_join = {
             from: 'tasks',
             let: { plan_id: '$_id' },
-            pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$plan_id', '$$plan_id'] }, {$eq : ['$is_daily_task', true]}]} } }],
+            pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$plan_id', '$$plan_id'] }, { $eq: ['$is_daily_task', true] }, {$eq : ["$deleted_flag", false]}]} } }],
             as : 'tasks'
         }
         const projection = { task_name: '$tasks.task_name', timinng: '$tasks.timing', date: '$tasks.date' };
         db.collection('plans').aggregate(
             [
-                { $match: { user_id: user_id } },
+                { $match: { user_id: user_id, deleted_flag : false } },
                 { $lookup: task_join },
                 { $unwind: {path : '$tasks'} },
                 { $project: projection}
@@ -78,7 +78,7 @@ exports.getTodayTask = async (req, res) => {
         let task_join = {
             from: 'tasks',
             let: { plan_id: '$_id' },
-            pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$plan_id', '$$plan_id'] }, { $eq: ['$date', date]}]} } }],
+            pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$plan_id', '$$plan_id'] }, { $eq: ['$date', date]}, {$eq : ["$deleted_flag", false]}]} } }],
             as : 'tasks'
         }
         const projection = { task_name: '$tasks.task_name', timinng: '$tasks.timing', date: '$tasks.date' };
