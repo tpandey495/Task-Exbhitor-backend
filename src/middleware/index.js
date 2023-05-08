@@ -4,11 +4,17 @@ const User = require('../models/user.models')
 
 exports.verifyToken = async(req,res,next)=>{
     try{
-        const token = req.headers['x-access-token']
-        // console.log(token)
-        if(!token)
+        const data = req.headers['x-access-token']
+        
+        
+        let tmp = data.split(' ')[1]
+        let token = "";
+        for (let i = 0; i < tmp.length - 1; i++)    
+                token += tmp[i];
+        console.log(token);
+        if (!token)
          return res.status(403).send({auth: false, message:'No token provided'})
-
+    
         const decoded = jwt.verify(token,process.env.JWT_SECRET)
 
         const user = await User.findOne({_id:decoded._id})
