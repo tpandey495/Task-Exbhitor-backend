@@ -4,14 +4,7 @@ const User = require('../models/user.models')
 
 exports.verifyToken = async(req,res,next)=>{
     try{
-        const data = req.headers['x-access-token']
-        
-        
-        let tmp = data.split(' ')[1]
-        let token = "";
-        for (let i = 0; i < tmp.length - 1; i++)    
-                token += tmp[i];
-        console.log(token);
+        const token = req.headers['x-access-token']
         if (!token)
          return res.status(403).send({auth: false, message:'No token provided'})
     
