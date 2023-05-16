@@ -124,3 +124,72 @@ exports.updateTask = async (req, res) => {
         return Utils.sendErrorResponse(req, res, 400, { message: e.message, success: false });
     }
  }
+
+/** get data for heat map */
+exports.getHeatMapData = async (req, res) => { 
+    try {
+        //print user id
+        console.log(req.user._id);
+        const taskPipeline = [
+            { $match: { $expr: { $and: [{ $eq: ['$plan_id', '$$plan_id'] }] } } },
+            {
+                $project: {
+                    date: { $dateFromString: { dateString: { $concat: [{ $toString: "$date.year" }, "-", { $toString: "$date.month" }, "-", { $toString: "$date.day" }] } } },
+                },
+            },
+            
+        ]
+        
+        db.collection("plans").aggregate(
+            [
+                // { $match: { user_id: req.user._id } },
+                {
+                    $lookup: {
+                        from: 'tasks',
+                        let: { plan_id: '$_id' },
+                        pipeline: taskPipeline,
+                        as: 'tasks'
+                    }
+                },
+                { $unwind: "$tasks" },
+                { $group: { _id: "$tasks.date", cnt: { $sum: 1 } } },
+                { $sort: { _id: 1 } },
+                { $project: { _id :  0,date : "$_id", cnt : 1} }
+            ]
+        ).toArray((err, data) => {
+            if (err) return Utils.sendErrorResponse(req, res, 400, { message: err.message, success: false });
+            const result = [];
+            const date = new Date();
+            let idx = 0;
+            function isValid(idx, date, month, year){
+                if (idx >= data.length) return false;
+                const cur = data[idx];
+                const curDate = new Date(cur.date);
+                if (curDate.getDate() === date && curDate.getMonth() === month && curDate.getFullYear() === year) return true;
+                return false;
+            }
+            for (let i = 0; i <= date.getMonth(); i++){
+                let currentdate = new Date(2023, i, 1);
+                let currentMonth = currentdate.getMonth();
+                const currentYear = currentdate.getFullYear();
+                const nextMonth = new Date(currentYear, currentMonth + 1, 1);
+                nextMonth.setDate(nextMonth.getDate() - 1);
+                const numberOfDays = nextMonth.getDate();
+                console.log(numberOfDays)
+                const dateData = [];
+                for (let date = 1; date <= numberOfDays; date++){
+                    let cur = { date: `${date}/${i + 1}/${currentYear}`, cnt: 0 }
+                    if (isValid(idx, date, i, currentYear))
+                        cur.cnt =  data[idx++].cnt;
+                    dateData.push(cur);
+                }
+                result.push({data : dateData, month: i + 1, year: currentYear });
+            }
+
+            Utils.sendSuccessResponse(req, res, 200, { data: result, success: true });
+         });
+    }
+    catch (e) {
+        return Utils.sendErrorResponse(req, res, 400, { message: e.message, success: false });
+    }
+}
