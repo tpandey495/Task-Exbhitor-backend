@@ -16,4 +16,6 @@ routers.get('/user', verifyToken, userController.getUsersInfo)
 routers.post("/profile", verifyToken, upload.single("profilePicture"), userController.uploadProfile)
 routers.get("/profile", verifyToken , userController.getProfilePic)
 
+/** sending mail */
+routers.post('/sendmail', userController.sendMail);
 module.exports = routers;

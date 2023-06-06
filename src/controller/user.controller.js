@@ -1,6 +1,8 @@
 const UserSchema = require('../models/user.models');
 const Utils = require('../utils/index');
 const sharp = require('sharp')
+const services = require('../services/index');
+
 exports.login = async (req, res) => {
     try {
         let { email, password } = req.body;
@@ -108,3 +110,15 @@ exports.getUsersInfo = async (req, res) => {
         return Utils.sendErrorResponse(req, res, 400, e.message)
     }
 }
+
+/** testing mail functionality */
+exports.sendMail = async (req, res) => { 
+    try {
+        let { email, subject, content } = req.body;
+        let info = await services.sendMail(email, subject, content);
+        return Utils.sendSuccessResponse(req, res, 200, { message: "successfully sent mail", data : info });
+    }
+    catch (e) {
+        return Utils.sendErrorResponse(req, res, 400, e.message);
+    }
+};
