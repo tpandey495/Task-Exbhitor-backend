@@ -11,7 +11,7 @@ exports.login = async (req, res) => {
         if (!isUser)
             return sendErrorResponse(req, res, 400, 'user is not exists');
         let token = await isUser.generateAuthToken();
-        console.log(token)
+        
         return Utils.sendSuccessResponse(req, res, 200, {user : isUser, authToken : token});
     }
     catch (e) {
@@ -111,14 +111,38 @@ exports.getUsersInfo = async (req, res) => {
     }
 }
 
-/** testing mail functionality */
-exports.sendMail = async (req, res) => { 
+
+/** generate reset password link */
+exports.generateResetPasswordLink = async (req, res) => { 
     try {
-        let { email, subject, content } = req.body;
-        let info = await services.sendMail(email, subject, content);
-        return Utils.sendSuccessResponse(req, res, 200, { message: "successfully sent mail", data : info });
+        let userEmail = req.body.userEmail;
+        if (!userEmail) return Utils.sendErrorResponse(req, res, 400, 'send userEmail');
+        userEmail = userEmail.toLowerCase();
+        const isUser = await UserSchema.findOne({ email: userEmail });
+        if (!isUser) return Utils.sendErrorResponse(req, res, 400, 'user is not exists');
+        const token = await isUser.generateAuthToken();
+        const link = `${process.env.BASE_URL}/reset-password/${token}`;
+        const html = `<p>Hi ${isUser.fName},</p><p>Click <a href="${link}">here</a> to reset your password.</p>`;  
+        await services.sendMail(userEmail, 'Reset Password', html);
+        return Utils.sendSuccessResponse(req, res, 200, { message: 'Reset password link has been sent to your email' });
     }
     catch (e) {
         return Utils.sendErrorResponse(req, res, 400, e.message);
     }
-};
+}
+
+exports.resetPassword = async (req, res) => { 
+    try {
+        const { password } = req.body;
+        if (!password) return Utils.sendErrorResponse(req, res, 400, 'send password');
+        const user = await UserSchema.findOne({ _id: req.user._id });
+        if (!user) return Utils.sendErrorResponse(req, res, 400, 'user is not exists');
+        user.password = password;
+        await user.save();
+        return Utils.sendSuccessResponse(req, res, 200, { message: 'password has been reset successfully' });
+
+    }
+    catch (e) {
+        return Utils.sendErrorResponse(req, res, 400, e.message);
+    }
+}

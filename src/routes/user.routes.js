@@ -16,6 +16,7 @@ routers.get('/user', verifyToken, userController.getUsersInfo)
 routers.post("/profile", verifyToken, upload.single("profilePicture"), userController.uploadProfile)
 routers.get("/profile", verifyToken , userController.getProfilePic)
 
-/** sending mail */
-routers.post('/sendmail', userController.sendMail);
+/** user forgot password */
+routers.post("/reset-link", userController.generateResetPasswordLink);
+routers.post("/reset-password",verifyToken, userController.resetPassword);
 module.exports = routers;

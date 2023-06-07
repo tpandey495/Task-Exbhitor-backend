@@ -28,8 +28,8 @@ exports.sendMail = async (email, subject, content) => {
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,
-      subject : "Testing ",
-      html: "<h1>hello</h1>"
+      subject : subject,
+      html: content
     };
     console.log("sending mail");
     let info = await transporter.sendMail(mailOptions);
