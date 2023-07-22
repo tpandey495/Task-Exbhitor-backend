@@ -1,5 +1,6 @@
 const Utils = require('../utils/index');
 const PlanSchema = require("../models/plan.model");
+const TaskSchema = require("../models/task.model");
 
 exports.createPlan = async (req, res) => {
     try {
@@ -26,8 +27,22 @@ exports.createPlan = async (req, res) => {
 exports.getPlans = async (req, res) => {
     try {
         let user_id = req.user._id;
-        const plans = await PlanSchema.find({ user_id, deleted_flag : false }, { plan_name: 1, desc: 1 });
-        return Utils.sendSuccessResponse(req, res, 200, plans);
+        let plans = await PlanSchema.find({ user_id, deleted_flag: false }, { plan_name: 1, desc: 1 });
+        let result = [];
+        for (let plan of plans) {
+            const current = {};
+            current._id = plan._id;
+            current.plan_name = plan.plan_name;
+            current.desc = plan.desc;
+            let total = await TaskSchema.countDocuments({ plan_id: plan._id, deleted_flag: false });
+            let completed = await TaskSchema.countDocuments({ plan_id: plan._id, deleted_flag: false, is_completed: true });
+            plan.total = total;
+            plan.completed = completed;
+            result.push({...current, total, completed});
+            // console.log(result);
+        }
+       
+        return Utils.sendSuccessResponse(req, res, 200, result);
     }
     catch (e) {
         return Utils.sendErrorResponse(req, res, 400, e.message);
