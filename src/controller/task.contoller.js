@@ -129,6 +129,58 @@ exports.getTodayTask = async (req, res) => {
     }
 }
 
+exports.getUpComingTask = async (req, res) => {
+    try {
+        let user_id = req.user._id;
+        const currentDate = new Date();
+        const query = {
+            'tasks.date': {
+                $gt: {
+                    day: currentDate.getDate(),
+                    month: currentDate.getMonth() + 1, // Months are zero-indexed, so add 1 to get the correct month.
+                    year: currentDate.getFullYear()
+                }
+            }
+        };
+        let task_join = {
+            from: 'tasks',
+            let: { plan_id: '$_id' },
+            pipeline: [
+                {
+                    $match:
+                    {
+                        $expr: {
+                            $and:
+                                [
+                                    { $eq: ['$plan_id', '$$plan_id'] },
+                                    { $eq: ["$deleted_flag", false] },
+                                    { $eq: ['$is_completed', false] },
+                                ]
+                        }
+                    }
+                }],
+            as: 'tasks'
+        }
+        const projection = { task_name: '$tasks.task_name', timinng: '$tasks.timing', date: '$tasks.date' };
+        db.collection('plans').aggregate(
+            [
+                { $match: { user_id: user_id } },
+                { $lookup: task_join },
+                { $unwind: { path: '$tasks' } },
+                { $match: query },
+                { $project: projection}
+            ]
+        ).toArray((err, results) => {
+            
+            if (err) return Utils.sendErrorResponse(req, res, 400, { message: err.message, success: false });
+            Utils.sendSuccessResponse(req, res, 200, {data : results, success : true});
+        })
+    
+    }
+    catch (e) {
+        return Utils.sendErrorResponse(req, res, 400, { message: e.message, success: false });
+    }
+}
 /** update task  */
 exports.updateTask = async (req, res) => {
     try {
