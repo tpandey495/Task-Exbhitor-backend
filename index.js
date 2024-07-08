@@ -5,6 +5,7 @@ const session = require('express-session');
 require('dotenv').config();
 const passport=require('./src/config/passport-config.js');
 const routes=require('./src/routes/index');
+const Port=process.env.port||9000
 //Invoking all the functionality of express as app
 const app = express();
 //middlewares
@@ -24,4 +25,4 @@ app.get('/', (req, res) => {
     res.send({ message: 'server is working' });
 })
 
-app.listen(process.env.PORT, () => console.log('server has started'));
+app.listen(Port,() => console.log('server has started',Port));
